@@ -12,9 +12,9 @@ function getDb() {
       db.pragma('journal_mode = WAL');
       db.pragma('foreign_keys = ON');
       initSchema();
-      console.log("✅ DB initialized at", DB_PATH);
+      console.log("DB initialized");
     } catch (err) {
-      console.error("❌ DB ERROR:", err);
+      console.error("DB failed, continuing without crash:", err);
     }
   }
   return db;
