@@ -511,7 +511,7 @@ async function apiFetch(path, opts = {}) {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.message || data.errors?.[0]?.msg || 'Request failed');
+    throw new Error(data.message || data.error || data.errors?.[0]?.msg || 'Request failed');
   }
   return data;
 }
@@ -583,7 +583,8 @@ async function doSignup() {
 async function checkSession() {
   if (!token) return;
   try {
-    currentUser = await apiFetch('/auth/me');
+    const meData = await apiFetch('/auth/me');
+    currentUser = meData.user || meData;
     enterApp();
   } catch {
     token = null; localStorage.removeItem('tf_token');
