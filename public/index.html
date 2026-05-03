@@ -485,11 +485,7 @@ button, input, select, textarea { font-family: inherit; font-size: inherit; colo
 // ── Config ───────────────────────────────────────────────────
 // In production, set this to your Railway API URL:
 // e.g. const API = 'https://taskflow-production.up.railway.app/api';
-const API = window.TASKFLOW_API_URL || (
-  window.location.hostname === 'localhost'
-    ? 'http://localhost:5000/api'
-    : window.location.origin + '/api'
-);
+const API = '/api';
 
 // ── State ─────────────────────────────────────────────────────
 let currentUser = null;
