@@ -501,20 +501,22 @@ let calYear, calMonth, miniCalYear, miniCalMonth, selectedCalDate;
 let statusChart, workloadChart;
 
 // ── API helper ────────────────────────────────────────────────
-const API = "";
-
 async function apiFetch(path, opts = {}) {
-  const headers = {
-    'Content-Type': 'application/json',
-    ...(opts.headers || {})
-  };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-  const res = await fetch(API + "/api" + path, {
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  const res = await fetch(API + path, {
     ...opts,
-    headers
+    headers: {
+      ...headers,
+      ...(opts.headers || {})
+    }
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || "Request failed");
+  if (!res.ok) {
+    throw new Error(data.message || data.errors?.[0]?.msg || 'Request failed');
+  }
   return data;
 }
 // ── AUTH ──────────────────────────────────────────────────────
@@ -527,29 +529,38 @@ function switchAuthTab(tab) {
 async function doLogin() {
   $('login-error').textContent = '';
   const btn = $('login-btn');
-  btn.innerHTML = '<span class="spinner"></span> Signing in…'; btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Signing in…';
+  btn.disabled = true;
+
   try {
-    const data = await apiFetch('/api/auth/login', {
+    const data = await apiFetch('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email: $('login-email').value, password: $('login-pass').value })
+      body: JSON.stringify({
+        email: $('login-email').value,
+        password: $('login-pass').value
+      })
     });
+
     token = data.token;
     currentUser = data.user;
     localStorage.setItem('tf_token', token);
     enterApp();
+
   } catch (err) {
     $('login-error').textContent = err.message;
   } finally {
-    btn.innerHTML = 'Sign In →'; btn.disabled = false;
+    btn.innerHTML = 'Sign In →';
+    btn.disabled = false;
   }
 }
-
 async function doSignup() {
   $('signup-error').textContent = '';
   const btn = $('signup-btn');
-  btn.innerHTML = '<span class="spinner"></span> Creating…'; btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Creating…';
+  btn.disabled = true;
+
   try {
-    const data = await apiFetch('/api/auth/signup'), {
+    const data = await apiFetch('/auth/signup', {
       method: 'POST',
       body: JSON.stringify({
         name: $('su-name').value,
@@ -557,16 +568,21 @@ async function doSignup() {
         password: $('su-pass').value
       })
     });
+
     token = data.token;
     currentUser = data.user;
     localStorage.setItem('tf_token', token);
     enterApp();
+
   } catch (err) {
     $('signup-error').textContent = err.message;
   } finally {
-    btn.innerHTML = 'Create Account →'; btn.disabled = false;
+    btn.innerHTML = 'Create Account →';
+    btn.disabled = false;
   }
 }
+
+
 
 async function checkSession() {
   if (!token) return;
